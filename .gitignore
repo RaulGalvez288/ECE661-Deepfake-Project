@@ -1,3 +1,5 @@
 stargan-v2-master/checkpoints/
 stargan-v2-master/expr/
 stargan-v2-master/data/
+Classifier/fake_baseline.zip
+Classifier/real_fulls.zip
