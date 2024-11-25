@@ -51,12 +51,17 @@ class Solver(nn.Module):
                     weight_decay=args.weight_decay)
 
             self.ckptios = [
-                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_nets.ckpt'), data_parallel=True, **self.nets),
-                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_nets_ema.ckpt'), data_parallel=True, **self.nets_ema),
-                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_optims.ckpt'), **self.optims)]
+                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_nets.ckpt'.format(0)), data_parallel=True, **self.nets),
+                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_nets_ema.ckpt'.format(0)), data_parallel=True, **self.nets_ema),
+                CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_optims.ckpt'.format(0)), **self.optims)]
         else:
-            self.ckptios = [CheckpointIO(ospj(args.checkpoint_dir, '{:06d}_nets_ema.ckpt'), data_parallel=True, **self.nets_ema)]
-
+            self.ckptios = [
+                CheckpointIO(
+                    ospj(args.checkpoint_dir, '{:06d}_nets_ema.ckpt'.format(args.resume_iter)),
+                    data_parallel=True,
+                    **self.nets_ema
+                )
+            ]
         self.to(self.device)
         for name, network in self.named_children():
             # Do not initialize the FAN parameters

@@ -101,21 +101,20 @@ def translate_using_latent(nets, args, x_src, y_trg_list, z_trg_list, psi, filen
 @torch.no_grad()
 def translate_using_reference(nets, args, x_src, x_ref, y_ref, filename):
     N, C, H, W = x_src.size()
-    wb = torch.ones(1, C, H, W).to(x_src.device)
-    x_src_with_wb = torch.cat([wb, x_src], dim=0)
-
     masks = nets.fan.get_heatmap(x_src) if args.w_hpf > 0 else None
     s_ref = nets.style_encoder(x_ref, y_ref)
     s_ref_list = s_ref.unsqueeze(1).repeat(1, N, 1)
-    x_concat = [x_src_with_wb]
+    
+    # Generate each fake image and save individually
     for i, s_ref in enumerate(s_ref_list):
         x_fake = nets.generator(x_src, s_ref, masks=masks)
-        x_fake_with_ref = torch.cat([x_ref[i:i+1], x_fake], dim=0)
-        x_concat += [x_fake_with_ref]
+        # Save each generated image separately
+        for j in range(x_fake.size(0)):
+            output_filename = filename.replace('.jpg', f'_fake_{i}_{j}.jpg')
+            save_image(x_fake[j:j+1], 1, output_filename)
 
-    x_concat = torch.cat(x_concat, dim=0)
-    save_image(x_concat, N+1, filename)
-    del x_concat
+    # Delete to free up memory
+    del x_fake
 
 
 @torch.no_grad()
@@ -201,6 +200,8 @@ def video_ref(nets, args, x_src, x_ref, y_ref, fname):
     video = []
     s_ref = nets.style_encoder(x_ref, y_ref)
     s_prev = None
+    frames = None  # Initialize frames variable
+    
     for data_next in tqdm(zip(x_ref, y_ref, s_ref), 'video_ref', len(x_ref)):
         x_next, y_next, s_next = [d.unsqueeze(0) for d in data_next]
         if s_prev is None:
@@ -217,11 +218,14 @@ def video_ref(nets, args, x_src, x_ref, y_ref, fname):
         video.append(frames)
         x_prev, y_prev, s_prev = x_next, y_next, s_next
 
-    # append last frame 10 time
-    for _ in range(10):
-        video.append(frames[-1:])
-    video = tensor2ndarray255(torch.cat(video))
-    save_video(fname, video)
+    # Only append last frame if we have processed at least one frame
+    if frames is not None:
+        for _ in range(10):
+            video.append(frames[-1:])
+        video = tensor2ndarray255(torch.cat(video))
+        save_video(fname, video)
+    else:
+        print("Warning: No frames were generated. Check your input data.")
 
 
 @torch.no_grad()

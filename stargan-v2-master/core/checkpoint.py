@@ -35,7 +35,10 @@ class CheckpointIO(object):
         torch.save(outdict, fname)
 
     def load(self, step):
-        fname = self.fname_template.format(step)
+        # Hardcode the filename to always use 100000
+        fname = self.fname_template.format('100000')
+        fname = os.path.normpath(fname)
+        
         assert os.path.exists(fname), fname + ' does not exist!'
         print('Loading checkpoint from %s...' % fname)
         if torch.cuda.is_available():
