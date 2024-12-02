@@ -4,7 +4,9 @@ python main.py --mode train --num_domains 2 --w_hpf 1 \
                --train_img_dir data/celeb_male/train \
                --val_img_dir data/celeb_male/val \
                --checkpoint_dir expr/checkpoints/ \
-               --resume_iter 300000 
+               --num_workers 0 \
+               --resume_iter 300000 \
+               --total_iters 400000
 
 
 
