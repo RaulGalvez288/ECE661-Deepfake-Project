@@ -52,9 +52,9 @@ class CheckpointIO(object):
         else:
             # Fix: Format the step number properly with an f-string
             # fname = os.path.join(self.folder, f"{int(step):06d}_{suffix}.ckpt")
-            fname = os.path.join(self.folder, f"250000_{suffix}.ckpt")
+            fname = os.path.join(self.folder, f"010000_{suffix}.ckpt")
         
-        fname = f"expr/checkpoints/250000_{suffix}.ckpt"
+        fname = f"expr/checkpoints/010000_{suffix}.ckpt"
         assert os.path.exists(fname), fname + ' does not exist!'
         print('Loading checkpoint from %s...' % fname)
         if torch.cuda.is_available():
@@ -62,4 +62,4 @@ class CheckpointIO(object):
         else:
             module_dict = torch.load(fname, map_location=torch.device('cpu'))
         for name, module in self.module_dict.items():
-            module.load_state_dict(module_dict[name])
+            module.load_state_dict(module_dict[name], strict=False)
