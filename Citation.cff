@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Galvez
+    given-names: Raul
+title: "Deepfake Generation: Evaluating Classifier Robustness and Accuracy on Generated Images"
+version: 2.0.4
+date-released: 2024-12-12
